@@ -1219,117 +1219,33 @@ abstract contract Ownable is Context {
 
 pragma solidity ^0.8.0;
 
-contract DeadPunkzNFT is ERC721Enumerable, Ownable {
+contract CoveatGalleryNFT is ERC721Enumerable, Ownable {
 
     using Strings for uint256;
 
     string public baseTokenURI;
     string public baseExtension = ".json";
 
-    uint256 public maxSupply = 10000;
-    uint256 public preSaleSupply = 2500;
-    uint256 public publicSaleSupply = 7500;
-
-    bool public isPreSaleActive = false;
-    bool public isPublicSaleActive = false;
-
-    uint256 public prePrice = 0.08 ether;
-    uint256 public pubicPrice = 0.1 ether;
-
-    mapping(address => bool) public whitelist;
-
-    uint256 public totalWhitelist;
+    uint256 public price = 0.1 ether;
     
     bool public paused = false;
-
-    /**
-    * @dev Throws if called by any account is not whitelisted.
-    */
-    modifier onlyWhitelisted() {
-        require(whitelist[msg.sender], 'Sorry, this address is not on the whitelist. Please message us on Discord.');
-        _;
-    }
     
-    constructor() ERC721("Dragon NFT", "SHT") {
+    constructor() ERC721("CoveatGallery NFT", "COVEAT") {
         //setBaseURI(baseURI);
     }
 
-    function price() public view returns (uint256) {
-        if (isPreSaleActive) {
-            return prePrice;
-        } else {
-            return pubicPrice;
-        }
-    }
 
-    function flipPreSale() public onlyOwner {
-        isPublicSaleActive = false;
-        isPreSaleActive = !isPreSaleActive;
-    }
-
-    function flipPublicSale() public onlyOwner {
-        isPreSaleActive = false;
-        isPublicSaleActive = !isPublicSaleActive;
-    }
-
-    /** Add multiple addresses to whitelist */
-    function multipleAddressesToWhiteList(address[] memory addresses) public onlyOwner {
-        for(uint256 i =0; i < addresses.length; i++) {
-            singleAddressToWhiteList(addresses[i]);
-        }
-    }
-
-    /** Add single address to whitelist */
-    function singleAddressToWhiteList(address userAddress) public onlyOwner {
-        require(userAddress != address(0), "Address can not be zero");
-        whitelist[userAddress] = true;
-        totalWhitelist++;
-    }
-
-    /** Remove multiple addresses from whitelist */
-    function removeAddressesFromWhiteList(address[] memory addresses) public onlyOwner {
-        for(uint i =0; i<addresses.length; i++) {
-            removeAddressFromWhiteList(addresses[i]);
-        }
-    }
-
-    /** Remove single address from whitelist */
-    function removeAddressFromWhiteList(address userAddress) public onlyOwner {
-        require(userAddress != address(0), "Address can not be zero");
-        whitelist[userAddress] = false;
-        totalWhitelist--;
-    }
-
-
-    function preSaleMint() public payable onlyWhitelisted {
+    function Mint() public payable {
         uint256 supply = totalSupply();
 
         require(!paused,                                'Contract is paused.');
-        require(isPreSaleActive,                        'Pre sale is not active');
-        require(supply < preSaleSupply,                 'This transaction would exceed presale supply of queen');
-        require(msg.value >= prePrice,                  'Ether value is too low');
+        require(msg.value >= price,                     'Ether value is too low');
 
-        if (totalSupply() < preSaleSupply) {
-            preSaleSupply += 1;
-            _safeMint(msg.sender, supply + 1);
-        }
+        _safeMint(msg.sender, supply + 1);
 
         require(payable(owner()).send(msg.value));
     }
 
-    function publicSaleMint() public payable {
-        uint256 supply = totalSupply();
-
-        require(!paused,                                'Contract is paused.');
-        require(supply < maxSupply,                     'This transaction would exceed max supply of queen');
-        require(msg.value >= price(),                   'Ether value is too low');
-
-        if (totalSupply() < maxSupply) {
-            _safeMint(msg.sender, supply + 1);
-        }
-
-        require(payable(owner()).send(msg.value));
-    }
 
     function _baseURI() internal view virtual override returns (string memory) {
         return baseTokenURI;
@@ -1353,16 +1269,6 @@ contract DeadPunkzNFT is ERC721Enumerable, Ownable {
 
     function setBaseURI(string memory baseURI) public onlyOwner {
         baseTokenURI = baseURI;
-    }
-
-    function setPrice(uint256 _max_price, uint256 _min_price) public onlyOwner {
-        pubicPrice = _max_price;
-        prePrice = _min_price;
-    }
-
-    function setSupply(uint256 _max_supply, uint256 _publicsaleSupply) public onlyOwner {
-        maxSupply = _max_supply;
-        publicSaleSupply = _publicsaleSupply;
     }
     
     function setBaseExtension(string memory _base_extension) public onlyOwner {

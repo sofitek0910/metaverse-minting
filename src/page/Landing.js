@@ -1,26 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import $ from 'jquery';
 import { connect } from "../redux/blockchain/blockchainActions";
 import { fetchData } from "../redux/data/dataActions";
-import swal from "sweetalert";
 
-function App() {
+function Landing() {
   const dispatch = useDispatch();
   const blockchain = useSelector((state) => state.blockchain);
   const data = useSelector((state) => state.data);
-  const [toggleMenu, setToggleMenu] = useState(false);
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-  const [scrollY, setScrollY] = useState(window.innerHeight);
   const [walletAddress, setWallet] = useState("");
-  const [claimingNft, setClaimingNft] = useState(false);
-  const [feedback, setFeedback] = useState(`Click buy to mint your NFT.`);
-  const [mintAmount, setMintAmount] = useState(1);
-  const [welcomeHeight, setWelcomeHeight] = useState(0);
-  const [buyHeight, setBuyHeight] = useState(0);
-  const [specsHeight, setSpecsHeight] = useState(0);
-  const [roadmapHeight, setRoadmapHeight] = useState(0);
-  const [communityHeight, setCommunityHeight] = useState(0);
   const [CONFIG, SET_CONFIG] = useState({
     CONTRACT_ADDRESS: "",
     SCAN_LINK: "",
@@ -40,62 +27,12 @@ function App() {
     SHOW_BACKGROUND: false,
   });
 
-  const toggleNav = () => {
-    setToggleMenu(!toggleMenu)
-  }
-
-  const claimNFTs = () => {
-    let cost = CONFIG.WEI_COST;
-    let gasLimit = CONFIG.GAS_LIMIT;
-    let totalCostWei = String(cost * mintAmount);
-    let totalGasLimit = String(gasLimit * mintAmount);
-    console.log("Cost: ", totalCostWei);
-    console.log("Gas limit: ", totalGasLimit);
-    console.log("smartcontract--->", blockchain.smartContract)
-    // swal(`Minting your ${CONFIG.NFT_NAME}...`, "", "info");
-    setClaimingNft(true);
-    blockchain.smartContract.methods
-      .publicSaleMint()
-      .send({
-        gasLimit: String(totalGasLimit),
-        to: CONFIG.CONTRACT_ADDRESS,
-        from: blockchain.account,
-        value: totalCostWei,
-      })
-      .once("error", (err) => {
-        console.log(err);
-        swal("Sorry, something went wrong please try again later.", "", "error");
-        setClaimingNft(false);
-      })
-      .then((receipt) => {
-        console.log(receipt);
-        swal(
-          `WOW, the ${CONFIG.NFT_NAME} is yours! go visit Opensea.io to view it.`, "", "success"
-        );
-        setClaimingNft(false);
-        dispatch(fetchData(blockchain.account));
-      });
-  };
-
-  const decrementMintAmount = () => {
-    let newMintAmount = mintAmount - 1;
-    if (newMintAmount < 1) {
-      newMintAmount = 1;
-    }
-    setMintAmount(newMintAmount);
-  };
-
-  const incrementMintAmount = () => {
-    let newMintAmount = mintAmount + 1;
-    if (newMintAmount > 20) {
-      newMintAmount = 20;
-    }
-    setMintAmount(newMintAmount);
-  };
-
   const getData = () => {
     if (blockchain.account !== "" && blockchain.smartContract !== null) {
-      dispatch(fetchData(blockchain.account));
+        dispatch(fetchData(blockchain.account));
+        if (typeof window !== 'undefined') {
+            window.location.href = "/test-mint";
+        }
     }
     console.log("account===>", blockchain.account)
   };
@@ -110,33 +47,10 @@ function App() {
     const config = await configResponse.json();
     SET_CONFIG(config);
   };
-  
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  })
 
-  const handleScroll = () => {
-    setScrollY(window.scrollY);
-    setWelcomeHeight($(".top-section").height()+$(".navbar-block").height()+$(".hero-block").height()-250);
-    setBuyHeight($(".top-section").height()+$(".navbar-block").height()+$(".hero-block").height()+$(".welcome-section").height()-250);
-    setSpecsHeight($(".top-section").height()+$(".navbar-block").height()+$(".hero-block").height()+$(".welcome-section").height()+$(".buy-section").height()-50);
-    setRoadmapHeight($(".top-section").height()+$(".navbar-block").height()+$(".hero-block").height()+$(".welcome-section").height()+$(".buy-section").height()+$(".spec-section").height());
-    setCommunityHeight($(".top-section").height()+$(".navbar-block").height()+$(".hero-block").height()+$(".welcome-section").height()+$(".buy-section").height()+$(".spec-section").height()+$(".roadmap-section").height()+$(".team-section").height()+250);
-    // console.log("scroll--->", window.scrollY)
-    console.log('scroll event', $(".top-section").height()+$(".navbar-block").height()+$(".hero-block").height());
-  }
-  
-  useEffect(() => {
-    const changeWidth = () => {
-      setScreenWidth(window.innerWidth);
-    }
-  
-    window.addEventListener('resize', changeWidth);
-    return () => {
-        window.removeEventListener('resize', changeWidth)
-    }
-  }, []);
+//   useEffect(() => {
+//     splitting();
+//   }, []);
 
   useEffect(() => {
     getConfig();
@@ -145,6 +59,7 @@ function App() {
   useEffect(() => {
     getData();
   }, [blockchain.account]);
+
 
   return (
     <div>
@@ -184,7 +99,7 @@ function App() {
             </div>
         </div>
 
-        <div className="all-cases">
+        {/* <div className="all-cases">
             <div className="layer"> </div>
             <div className="inner">
                 <ul>
@@ -196,12 +111,12 @@ function App() {
                 <li><a href="#">Primero</a></li>
                 </ul>
             </div>
-        </div>
+        </div> */}
 
         <main>
             <aside className="left-side">
                 <div className="logo"> 
-                    <a href="index-video.html"> <img src="./assets/images/logo.png" alt="Image"/></a> 
+                    <a href="/"> <img src="./assets/images/logo.png" alt="Image"/></a> 
                 </div>
                 <div className="hamburger" id="hamburger">
                 <div className="hamburger__line hamburger__line--01">
@@ -223,7 +138,41 @@ function App() {
                 <div className="follow-us"> FOLLOW US </div>
                 <div className="equalizer"> <span></span> <span></span> <span></span> <span></span> </div>
             </aside>
-            <div className="all-cases-link"> <span>CONNECT WALLET</span> <b>+</b> </div>
+            {/* {blockchain.account == null && blockchain.account == undefined ? 
+                <button className="connect-button megrim-font"
+                    onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(connect());
+                    getData();
+                    }
+                }
+                >
+                CONNECT
+                </button>:
+                <span className="connect-button megrim-font">
+                {String(blockchain.account).substring(0, 4) +
+                    "..." +
+                    String(blockchain.account).substring(38)
+                }
+                </span>
+            } */}
+            <div className="all-cases-link"> 
+                    {blockchain.account == null && blockchain.account == undefined ? 
+                        <span>CONNECT WALLET</span>: 
+                        <span className="connect-button megrim-font">
+                        {String(blockchain.account).substring(0, 4) +
+                            "..." +
+                            String(blockchain.account).substring(38)
+                        }
+                        </span>
+                    } 
+                <b  onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(connect());
+                    getData();
+                    }
+                }>+</b> 
+            </div>
             <header className="video-hero">
                 <div className="video-bg">
                     <video src="./assets/videos/Vid_Primary.mp4" autoPlay muted loop></video>
@@ -263,7 +212,7 @@ function App() {
                             </div>
                             <div className="swiper-slide">
                                 <figure> 
-                                    <img src="./assets/images/office02.jpg" alt="Image"/>
+                                    <img src="./assets/images/Demo_slide2.jpg" alt="Image"/>
                                     <figcaption>
                                     </figcaption>
                                 </figure>
@@ -280,7 +229,7 @@ function App() {
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-12 wow" data-splitting>
-                        <h3 className="section-title">HOW IT WORKS<br/></h3>
+                            <h3 className="section-title">HOW IT WORKS<br/></h3>
                         </div>
                         <div className="col-lg-3 col-md-4 wow" data-splitting>
                         <div className="content-block selected">
@@ -384,4 +333,4 @@ function App() {
   );
 }
 
-export default App;
+export default Landing;

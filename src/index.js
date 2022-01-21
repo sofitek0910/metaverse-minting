@@ -4,6 +4,7 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import store from "./redux/store";
 import { Provider } from "react-redux";
+import { useHistory } from "react-router-dom";
 // import "./styles/reset.css";
 
 ReactDOM.render(
